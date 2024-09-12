@@ -3,8 +3,9 @@ import { User } from "../models/user.model.js";
 
 const protectRoute = async (req, res, next) => {
   try {
-    const token = req.cookies.jwt || req.cookies._vercel_jwt;
-    
+    const token = req.cookies.jwt || req.header("Auth") || req.cookies._vercel_jwt
+    // console.log(req.cookies);
+
     if (!token) {
       return res
         .status(401)
@@ -18,7 +19,7 @@ const protectRoute = async (req, res, next) => {
     }
 
     const user = await User.findById(decoded.userId).select("-password");
-    
+
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }

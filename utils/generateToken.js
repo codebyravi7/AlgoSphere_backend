@@ -7,11 +7,12 @@ const generateTokenAndSetCookie = (userId, res) => {
 
   res.cookie("jwt", token, {
     maxAge: 15 * 24 * 60 * 60 * 1000,
-    httpOnly: true,
-    sameSite: "strict",
-    secure: process.env.NODE_ENV != "development",
-    path: "/", // Ensure this matches the original path
-  });
+    httpOnly: true, // Prevent access to the cookie via JavaScript
+    secure: false, // Cannot be true since localhost isn't HTTPS
+    sameSite: "None", // Needed for cross-origin requests
+    domain: "localhost", // Ensure this matches the original path
+  })
+  return token;
 };
 
 export default generateTokenAndSetCookie;
