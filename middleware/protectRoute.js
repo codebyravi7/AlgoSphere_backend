@@ -3,7 +3,7 @@ import { User } from "../models/user.model.js";
 
 const protectRoute = async (req, res, next) => {
   try {
-    const token = req.cookies.jwt;
+    const token = req.cookies.jwt || req.cookies._vercel_jwt;
     
     if (!token) {
       return res
