@@ -71,6 +71,7 @@ export const addPost = async (req, res) => {
 
 export const deletePost = async (req, res) => {
   try {
+    console.log("call kiya kya");
     const user = req.user;
     const { postId } = req.body;
     const post = await Post.findById(postId);
@@ -80,7 +81,7 @@ export const deletePost = async (req, res) => {
     return res.json({
       message: "Post deleted Successfully",
       post,
-      success: false,
+      success: true,
     });
   } catch (err) {
     return res.json({ message: "Error in deleting Post", err, success: false });
@@ -175,7 +176,7 @@ export const addComment = async (req, res) => {
     });
     // console.log("first");
     await newcomment.save();
-    post?.comments?.push(newcomment?._id);
+    post?.comments?.unshift(newcomment?._id);
     await post.save();
     return res.json({
       message: "Commented Successfully!",
@@ -211,10 +212,11 @@ export const getOnePost = async (req, res) => {
 };
 
 export const allPosts = async (req, res) => {
-  const allposts = (
-    await Post.find({ $or: [{ public: true }, { public: { $exists: false } }] })
-  ).reverse();
+  let allposts = await Post.find({
+    $or: [{ public: true }, { public: { $exists: false } }],
+  });
 
+  allposts = allposts.reverse();
   res.json({ message: "All posts: ", allposts, success: true });
 };
 export const searchPost = async (req, res) => {
