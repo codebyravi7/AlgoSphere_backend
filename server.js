@@ -17,7 +17,6 @@ import connectToMongoDB from "./db/connectToMongoDB.js";
 import protectRoute from "./middleware/protectRoute.js";
 
 dotenv.config();
-// import messageRoutes from "./routes/message.routes.js";
 
 const corsOptions = {
   origin: true,

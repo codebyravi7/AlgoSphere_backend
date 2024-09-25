@@ -53,3 +53,24 @@ export const allfriends = async (req, res) => {
   }
 };
 
+export const userProfile = async (req, res) => {
+  try {
+    console.log("hello");
+    const { id } = req.params;
+    console.log(id);
+    const user = await User.findById(id).populate("posts");
+    const filteredPosts = user?.posts?.filter(
+      (post) => post?.public === true || post?.public == null
+    );
+
+    res.json({
+      message: "user-Profile",
+      fullName: user?.fullName,
+      profilePic: user?.profilePic,
+      filteredPosts,
+      success: true,
+    });
+  } catch (err) {
+    res.json({ message: "Error in finding user Profile", success: false });
+  }
+};
