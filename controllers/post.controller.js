@@ -8,7 +8,7 @@ import { Question } from "../models/question.model.js";
 
 export const addPost = async (req, res) => {
   try {
-    console.log("backend tak aay hun!!");
+    // console.log("backend tak aay hun!!");
     const user = req.user;
     const { id, qid } = req.params;
     const { title, description } = req.body;
@@ -23,9 +23,7 @@ export const addPost = async (req, res) => {
         `./public/Images/${data?.original_filename}.${data?.format}`,
         (err) => {
           if (err) {
-            console.log("error: ", err);
-          } else {
-            console.log("file deleted");
+            res.status(404).json("error: ", err);
           }
         }
       );
@@ -64,14 +62,14 @@ export const addPost = async (req, res) => {
       success: true,
     });
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     res.status(500).json({ message: "Error adding post", err });
   }
 };
 
 export const deletePost = async (req, res) => {
   try {
-    console.log("call kiya kya");
+    // console.log("call kiya kya");
     const user = req.user;
     const { postId } = req.body;
     const post = await Post.findById(postId);
@@ -89,7 +87,6 @@ export const deletePost = async (req, res) => {
 };
 export const editPost = async (req, res) => {
   try {
-    const user = req.user;
     const { postId, title, description, previmage } = req.body;
     let post;
     let result;
@@ -98,13 +95,14 @@ export const editPost = async (req, res) => {
       const url = data.secure_url;
       const public_id = data.public_id;
       //delete from local storage
-      fs.unlink(`./public/Images/${data?.original_filename}.png`, (err) => {
-        if (err) {
-          console.log("error: ", err);
-        } else {
-          console.log("file deleted");
+      fs.unlink(
+        `./public/Images/${data?.original_filename}.${data?.format}`,
+        (err) => {
+          if (err) {
+            res.status(500).json({ message: err, success: false });
+          } 
         }
-      });
+      );
       result = await Post.findByIdAndUpdate(postId, {
         title,
         description,
@@ -122,7 +120,7 @@ export const editPost = async (req, res) => {
       success: true,
     });
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     res.status(500).json({ message: "Error updating post", err });
   }
 };
@@ -163,7 +161,7 @@ export const likePost = async (req, res) => {
 export const addComment = async (req, res) => {
   try {
     const user = req.user;
-    console.log("user: ", user);
+    // console.log("user: ", user);
     const { postId, content } = req.body;
     const post = await Post.findById(postId);
     if (!post) {
