@@ -15,6 +15,7 @@ import userRoutes from "./routes/user.routes.js";
 import questionRoutes from "./routes/question.routes.js";
 import connectToMongoDB from "./db/connectToMongoDB.js";
 import protectRoute from "./middleware/protectRoute.js";
+import contestRoutes from "./routes/contest.routes.js";
 
 dotenv.config();
 
@@ -63,6 +64,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/post", postRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/question", questionRoutes);
+app.use("/api/contests", contestRoutes);
 
 app.listen(PORT, () => {
   connectToMongoDB();

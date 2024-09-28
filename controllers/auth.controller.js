@@ -67,7 +67,6 @@ export const login = async (req, res) => {
     }
 
     const token = generateTokenAndSetCookie(user._id, res);
-    console.log("settokenlogin",token);
 
     res.status(200).json({
       _id: user._id,
