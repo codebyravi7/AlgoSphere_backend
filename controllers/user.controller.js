@@ -55,19 +55,48 @@ export const allfriends = async (req, res) => {
 
 export const userProfile = async (req, res) => {
   try {
-    console.log("hello");
     const { id } = req.params;
     console.log(id);
     const user = await User.findById(id).populate("posts");
     const filteredPosts = user?.posts?.filter(
       (post) => post?.public === true || post?.public == null
     );
+    // console.log(user);
 
     res.json({
       message: "user-Profile",
       fullName: user?.fullName,
       profilePic: user?.profilePic,
+      codingProfiles:user?.codingProfiles,
       filteredPosts,
+      success: true,
+    });
+  } catch (err) {
+    res.json({ message: "Error in finding user Profile", success: false });
+  }
+};
+
+export const addProfiles = async (req, res) => {
+  try {
+    const user = req.user;
+    console.log(user);
+    const { leetcode, codechef, codeforces } = req.body;
+    console.log(leetcode, codechef, codeforces);
+    const updatedUser = await User.findByIdAndUpdate(
+      user._id,
+      {
+        $set: {
+          "codingProfiles.leetcode": leetcode,
+          "codingProfiles.codechef": codechef,
+          "codingProfiles.codeforces": codeforces,
+        },
+      },
+      { new: true } // Returns the updated user
+    );
+
+    res.json({
+      message: "user-Profile-added",
+      updatedUser: updatedUser,
       success: true,
     });
   } catch (err) {
