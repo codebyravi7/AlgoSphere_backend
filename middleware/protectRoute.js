@@ -3,8 +3,10 @@ import { User } from "../models/user.model.js";
 
 const protectRoute = async (req, res, next) => {
   try {
-    const token = req.cookies.jwt || req.header("Auth") || req.cookies._vercel_jwt
+    // const token = req.cookies.jwt || req.header("Auth") || req.cookies._vercel_jwt
+    const token = req.header("Auth");
     // console.log(req.cookies);
+    console.log("checking header:: ", req.header("Auth"));
 
     if (!token) {
       return res
