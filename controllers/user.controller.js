@@ -56,7 +56,7 @@ export const allfriends = async (req, res) => {
 export const userProfile = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log(id);
+    // console.log(id);
     const user = await User.findById(id).populate("posts");
     const filteredPosts = user?.posts?.filter(
       (post) => post?.public === true || post?.public == null
@@ -67,7 +67,7 @@ export const userProfile = async (req, res) => {
       message: "user-Profile",
       fullName: user?.fullName,
       profilePic: user?.profilePic,
-      codingProfiles:user?.codingProfiles,
+      codingProfiles: user?.codingProfiles,
       filteredPosts,
       success: true,
     });

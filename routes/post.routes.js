@@ -12,8 +12,6 @@ import protectRoute from "../middleware/protectRoute.js";
 
 const router = express.Router();
 
-// router.post("/add",protectRoute, addPost);
-// router.put("/edit", protectRoute, editPost);
 router.post("/delete", protectRoute, deletePost);
 router.put("/like", protectRoute, likePost);
 router.post("/addcomment", protectRoute, addComment);

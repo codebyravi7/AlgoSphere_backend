@@ -32,7 +32,7 @@ export const addquestion = async (req, res) => {
 };
 export const addRemovequestion = async (req, res) => {
   const { questionId, isChecked } = req.body;
-  const user = req.user
+  const user = req.user;
   try {
     if (!isChecked) {
       user?.questions?.push(questionId);
@@ -55,5 +55,19 @@ export const doneUndonequestion = async (req, res) => {
     return res.json(isDone);
   } catch (err) {
     return res.json({ message: err, success: false });
+  }
+};
+
+export const getonequestion = async (req, res) => {
+  const { id } = req.params;
+  console.log("im here", id);
+  try {
+    const question = await Question.findById(id)
+      .populate("notes")
+      .populate("blogs");
+
+    res.status(200).json({ message: "Question is :", question, success: true });
+  } catch (err) {
+    return res.status(404).json({ message: err, success: false });
   }
 };
