@@ -213,7 +213,7 @@ export const allPosts = async (req, res) => {
   let allposts = await Post.find({
     $or: [{ public: true }, { public: { $exists: false } }],
   });
-  console.log("posts::")
+  // console.log("posts::")
 
   allposts = allposts.reverse();
   res.json({ message: "All posts: ", allposts, success: true });

@@ -79,7 +79,6 @@ export const userProfile = async (req, res) => {
 export const addProfiles = async (req, res) => {
   try {
     const user = req.user;
-    console.log(user);
     const { leetcode, codechef, codeforces } = req.body;
     console.log(leetcode, codechef, codeforces);
     const updatedUser = await User.findByIdAndUpdate(

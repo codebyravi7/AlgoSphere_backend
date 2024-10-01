@@ -68,7 +68,7 @@ export const getAtcoderContests = async () => {
       ...parseTable($, $("#contest-table-upcoming").find("tbody")),
     ]; // Change: Combine contests in one step for readability
 
-    console.log("Fetched data from Atcoder!", contests.length);
+    // console.log("Fetched data from Atcoder!", contests.length);
     return contests;
   } catch (error) {
     console.error(`Error fetching contests: ${error.message}`); // Change: Log error message

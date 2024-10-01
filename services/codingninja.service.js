@@ -46,6 +46,6 @@ export const getCodingNinjaContests = async () => {
   const data = await fetchCodingNinjaContests();
   const parsedData = parseCodingNinjaContests(data);
 
-  console.log("Fetched data from CodingNinja!", parsedData.length);
+  // console.log("Fetched data from CodingNinja!", parsedData.length);
   return parsedData;
 };
