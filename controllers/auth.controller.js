@@ -34,7 +34,7 @@ export const signup = async (req, res) => {
 
     if (newUser) {
       // Generate JWT token here
-      generateTokenAndSetCookie(newUser._id, res);
+      const token = generateTokenAndSetCookie(newUser._id, res);
       await newUser.save();
 
       res.status(201).json({
@@ -42,6 +42,7 @@ export const signup = async (req, res) => {
         fullName: newUser.fullName,
         username: newUser.username,
         profilePic: newUser.profilePic,
+        token,
       });
     } else {
       res.status(400).json({ error: "Invalid user data" });
@@ -67,7 +68,7 @@ export const login = async (req, res) => {
     }
 
     const token = generateTokenAndSetCookie(user._id, res);
-
+    // console.log("token in login-> ", token);
     res.status(200).json({
       _id: user._id,
       fullName: user.fullName,

@@ -80,7 +80,7 @@ export const addProfiles = async (req, res) => {
   try {
     const user = req.user;
     const { leetcode, codechef, codeforces } = req.body;
-    console.log(leetcode, codechef, codeforces);
+    // console.log(leetcode, codechef, codeforces);
     const updatedUser = await User.findByIdAndUpdate(
       user._id,
       {
