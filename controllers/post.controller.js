@@ -60,6 +60,7 @@ export const addPost = async (req, res) => {
     return res.json({
       message: "Post added successfully!",
       success: true,
+      post
     });
   } catch (err) {
     // console.log(err);
@@ -100,7 +101,7 @@ export const editPost = async (req, res) => {
         (err) => {
           if (err) {
             res.status(500).json({ message: err, success: false });
-          } 
+          }
         }
       );
       result = await Post.findByIdAndUpdate(postId, {
@@ -118,6 +119,7 @@ export const editPost = async (req, res) => {
     return res.json({
       message: "Post Updated successfully!",
       success: true,
+      updatedPost: result,
     });
   } catch (err) {
     // console.log(err);
