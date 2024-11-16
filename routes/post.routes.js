@@ -17,9 +17,9 @@ router.put("/like", protectRoute, likePost);
 router.post("/addcomment", protectRoute, addComment);
 
 router.get("/allposts", protectRoute, allPosts);
-router.get("/:id", protectRoute, getOnePost);
 
 
 //get post for search//using post route..
 router.post("/search", protectRoute, searchPost);
+router.get("/:id", protectRoute, getOnePost);
 export default router;
