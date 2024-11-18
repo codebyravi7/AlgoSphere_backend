@@ -41,7 +41,8 @@ app.get("/", (req, res) => {
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "https://algosphere-backend.onrender.com/public/Images");
+    cb(null, "public/Images");
+    
   },
   filename: (req, file, cb) => {
     cb(
