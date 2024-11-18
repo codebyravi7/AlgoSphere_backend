@@ -14,6 +14,7 @@ export const addPost = async (req, res) => {
     const { title, description } = req.body;
     let post;
     if (req.file) {
+      console.log("req.file.path :: ",req.file.path);
       const data = await cloudinaryUploadImage(req.file.path);
       const url = data.secure_url;
       const public_id = data.public_id;
