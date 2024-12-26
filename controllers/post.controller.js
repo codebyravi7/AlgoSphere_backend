@@ -14,7 +14,7 @@ export const addPost = async (req, res) => {
     const { title, description } = req.body;
     let post;
     if (req.file) {
-      console.log("req.file.path :: ",req.file.path);
+      console.log("req.file.path :: ", req.file.path);
       const data = await cloudinaryUploadImage(req.file.path);
       const url = data.secure_url;
       const public_id = data.public_id;
@@ -61,7 +61,7 @@ export const addPost = async (req, res) => {
     return res.json({
       message: "Post added successfully!",
       success: true,
-      post
+      post,
     });
   } catch (err) {
     // console.log(err);
@@ -213,14 +213,42 @@ export const getOnePost = async (req, res) => {
 };
 
 export const allPosts = async (req, res) => {
-  let allposts = await Post.find({
-    $or: [{ public: true }, { public: { $exists: false } }],
-  });
-  // console.log("posts::")
+  try {
+    // Extract page and limit from query parameters
+    const page = parseInt(req.query.page) || 1; // Default to page 1 if not provided
+    const limit = parseInt(req.query.limit) || 10; // Default to 10 posts per page if not provided
 
-  allposts = allposts.reverse();
-  res.json({ message: "All posts: ", allposts, success: true });
+    console.log("Page:", page, "Limit:", limit);
+
+    // Calculate the starting index for pagination
+    const startIndex = (page - 1) * limit;
+
+    // Query the database with pagination
+    let allposts = await Post.find({
+      $or: [{ public: true }, { public: { $exists: false } }],
+    })
+      .sort({ _id: -1 }) // Optional: Sort posts in descending order
+      .skip(startIndex) // Skip the previous pages' posts
+      .limit(limit); // Limit to the number of posts per page
+
+    const totalPosts = await Post.countDocuments({
+      $or: [{ public: true }, { public: { $exists: false } }],
+    }); // Get the total number of posts for pagination metadata
+
+    res.json({
+      message: "All posts:",
+      allposts,
+      success: true,
+      currentPage: page,
+      totalPages: Math.ceil(totalPosts / limit),
+      totalPosts,
+    });
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    res.status(500).json({ message: "Error fetching posts", success: false });
+  }
 };
+
 export const searchPost = async (req, res) => {
   const { keyword } = req.body;
   const posts = await Post.find({
