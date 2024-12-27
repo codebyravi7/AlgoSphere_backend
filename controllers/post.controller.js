@@ -18,7 +18,7 @@ export const addPost = async (req, res) => {
       const data = await cloudinaryUploadImage(req.file.path);
       const url = data.secure_url;
       const public_id = data.public_id;
-      // console.log(data);
+      console.log("data form the cloudinary: ",data);
       //delete from local storage
       fs.unlink(
         `./public/Images/${data?.original_filename}.${data?.format}`,
@@ -28,6 +28,7 @@ export const addPost = async (req, res) => {
           }
         }
       );
+      console.log("no error all good")
       post = new Post({
         user: user._id,
         title,
@@ -58,7 +59,7 @@ export const addPost = async (req, res) => {
       await Promise.all([post.save(), question.save()]);
     }
 
-    return res.json({
+    return res.status(200).json({
       message: "Post added successfully!",
       success: true,
       post,
@@ -217,9 +218,6 @@ export const allPosts = async (req, res) => {
     // Extract page and limit from query parameters
     const page = parseInt(req.query.page) || 1; // Default to page 1 if not provided
     const limit = parseInt(req.query.limit) || 10; // Default to 10 posts per page if not provided
-
-    console.log("Page:", page, "Limit:", limit);
-
     // Calculate the starting index for pagination
     const startIndex = (page - 1) * limit;
 

@@ -4,6 +4,8 @@ import nodemailer from "nodemailer";
 export const scheduleEmailNotification = (req, res) => {
   try {
     const { contestTitle, contestStartTime, link } = req.body;
+    const email = req?.user?.email;
+    
     const contestDate = new Date(contestStartTime);
     const notificationTime = new Date(contestDate.getTime() - 10 * 60 * 1000); // 10 minutes before start time
 
