@@ -203,9 +203,9 @@ export const getOnePost = async (req, res) => {
           path: "user", // Assuming each comment has a `user` field to populate
         },
       });
-    res.json({ post });
+    res.status(200).json({ post });
   } catch (err) {
-    return res.json({
+    return res.status(404).json({
       message: "Post Not found !!!!!!!",
       err,
       success: false,
