@@ -5,6 +5,7 @@ import cloudinary from "cloudinary";
 import cloudinaryUploadImage from "../utils/imageUploader.js";
 import fs from "fs";
 import { Question } from "../models/question.model.js";
+import path from "path";
 
 export const addPost = async (req, res) => {
   try {
@@ -18,7 +19,7 @@ export const addPost = async (req, res) => {
       const data = await cloudinaryUploadImage(req.file.path);
       const url = data.secure_url;
       const public_id = data.public_id;
-      console.log("data form the cloudinary: ",data);
+      console.log("data form the cloudinary: ", data);
       //delete from local storage
       fs.unlink(
         `./public/Images/${data?.original_filename}.${data?.format}`,
@@ -28,7 +29,7 @@ export const addPost = async (req, res) => {
           }
         }
       );
-      console.log("no error all good")
+      console.log("no error all good");
       post = new Post({
         user: user._id,
         title,
@@ -72,22 +73,56 @@ export const addPost = async (req, res) => {
 
 export const deletePost = async (req, res) => {
   try {
-    // console.log("call kiya kya");
-    const user = req.user;
     const { postId } = req.body;
-    const post = await Post.findById(postId);
-    const public_Id = post.image.public_id;
-    await cloudinary.uploader.destroy(public_Id);
+
+    // Find the post to ensure it exists
+    const post = await Post.findById(postId).populate("comments");
+
+    if (!post) {
+      return res.status(404).json({
+        message: "Post not found",
+        success: false,
+      });
+    }
+
+    // Delete associated image from Cloudinary
+    const public_Id = post.image?.public_id;
+    if (public_Id) {
+      await cloudinary.uploader.destroy(public_Id);
+    }
+
+    // Function to recursively delete all comments linked to the post
+    const deleteComments = async (commentId) => {
+      const comment = await Comment.findById(commentId);
+      if (comment?.replies?.length) {
+        for (const replyId of comment.replies) {
+          await deleteComments(replyId); // Delete nested replies
+        }
+      }
+      await Comment.findByIdAndDelete(commentId); // Delete the current comment
+    };
+
+    // Delete all comments linked to the post
+    for (const commentId of post.comments) {
+      await deleteComments(commentId);
+    }
+
+    // Delete the post itself
     await Post.findByIdAndDelete(postId);
+
     return res.json({
-      message: "Post deleted Successfully",
-      post,
+      message: "Post and associated comments deleted successfully!",
       success: true,
     });
   } catch (err) {
-    return res.json({ message: "Error in deleting Post", err, success: false });
+    return res.status(500).json({
+      message: "Error in deleting Post",
+      error: err.message,
+      success: false,
+    });
   }
 };
+
 export const editPost = async (req, res) => {
   try {
     const { postId, title, description, previmage } = req.body;
@@ -165,27 +200,26 @@ export const likePost = async (req, res) => {
 export const addComment = async (req, res) => {
   try {
     const user = req.user;
-    // console.log("user: ", user);
     const { postId, content } = req.body;
     const post = await Post.findById(postId);
     if (!post) {
       return res.json({ message: "POST NOT FOUND!!", success: false });
     }
     const newcomment = new Comment({
-      // user: user?._id,
-      user,
+      userId: user?._id,
+      username: user?.fullName,
       content,
     });
-    // console.log("first");
     await newcomment.save();
     post?.comments?.unshift(newcomment?._id);
     await post.save();
-    return res.json({
+    return res.status(200).json({
       message: "Commented Successfully!",
+      comment: newcomment,
       success: true,
     });
   } catch (err) {
-    return res.json({
+    return res.status(404).json({
       message: "Error in adding Comment",
       err,
       success: false,
@@ -195,14 +229,9 @@ export const addComment = async (req, res) => {
 export const getOnePost = async (req, res) => {
   try {
     const { id } = req.params;
-    const post = await Post.findById(id)
-      .populate("user")
-      .populate({
-        path: "comments",
-        populate: {
-          path: "user", // Assuming each comment has a `user` field to populate
-        },
-      });
+    const post = await Post.findById(id).populate({
+      path: "comments",
+    });
     res.status(200).json({ post });
   } catch (err) {
     return res.status(404).json({
@@ -254,4 +283,122 @@ export const searchPost = async (req, res) => {
   });
 
   res.json({ message: "Search posts: ", posts, success: true });
+};
+
+export const addReplies = async (req, res) => {
+  try {
+    const user = req.user;
+    const { commentId, content } = req.body;
+    const comment = await Comment.findById(commentId);
+    if (!comment) {
+      return res.status(404).json({ message: "Comment NOT FOUND!!", success: false });
+    }
+    const newcomment = new Comment({
+      userId: user?._id,
+      username: user?.fullName,
+      content,
+    });
+    // console.log("first");
+    await newcomment.save();
+    comment?.replies?.unshift(newcomment?._id);
+    await comment.save();
+    return res.status(200).json({
+      message: "Replied Successfully!",
+      reply: newcomment,
+      success: true,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Error in adding Comment",
+      err,
+      success: false,
+    });
+  }
+};
+export const getReplies = async (req, res) => {
+  try {
+    const user = req.user;
+    const { commentId } = req.params;
+    const replies = await Comment.findById(commentId).populate({
+      path: "replies",
+    }); //populate the replies
+    return res.status(200).json({
+      message: "Replies fetched Successfully!",
+      replies,
+      success: true,
+    });
+  } catch (err) {
+    return res.status(404).json({
+      message: "Error in fetching Replies",
+      err,
+      success: false,
+    });
+  }
+};
+export const editComment = async (req, res) => {
+  try {
+    const user = req.user;
+    const { commentId } = req.params;
+    const updatedComment = await Comment.findByIdAndUpdate(
+      commentId,
+      { content: req.body.content },
+      { new: true }
+    );
+    return res.status(200).json({
+      message: "Comment edited Successfully!",
+      updatedComment,
+      success: true,
+    });
+  } catch (err) {
+    return res.status(404).json({
+      message: "Error in editing Reply",
+      err,
+      success: false,
+    });
+  }
+};
+export const deleteComment = async (req, res) => {
+  try {
+    const { commentId, postId } = req.body;
+    if (postId) {
+      const post = await Post.findById(postId);
+      post.comments = post.comments.filter(
+        (comment) => comment._id.toString() !== commentId
+      );
+      await post.save();
+    }
+
+    // Find the comment to be deleted
+    const comment = await Comment.findById(commentId);
+    if (!comment) {
+      return res.status(404).json({
+        message: "Comment not found",
+        success: false,
+      });
+    }
+
+    // Recursively delete all replies
+    const deleteReplies = async (commentId) => {
+      const comment = await Comment.findById(commentId);
+      if (comment?.replies?.length) {
+        for (const replyId of comment.replies) {
+          await deleteReplies(replyId); // Delete nested replies first
+        }
+      }
+      await Comment.findByIdAndDelete(commentId); // Delete the current comment
+    };
+
+    await deleteReplies(commentId);
+
+    return res.status(200).json({
+      message: "Comment and all replies deleted successfully!",
+      success: true,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Error while deleting the comment",
+      error: err.message,
+      success: false,
+    });
+  }
 };
