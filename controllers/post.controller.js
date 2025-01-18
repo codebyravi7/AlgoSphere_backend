@@ -9,17 +9,14 @@ import path from "path";
 
 export const addPost = async (req, res) => {
   try {
-    // console.log("backend tak aay hun!!");
     const user = req.user;
     const { id, qid } = req.params;
     const { title, description } = req.body;
     let post;
     if (req.file) {
-      console.log("req.file.path :: ", req.file.path);
       const data = await cloudinaryUploadImage(req.file.path);
       const url = data.secure_url;
       const public_id = data.public_id;
-      console.log("data form the cloudinary: ", data);
       //delete from local storage
       fs.unlink(
         `./public/Images/${data?.original_filename}.${data?.format}`,
@@ -29,7 +26,6 @@ export const addPost = async (req, res) => {
           }
         }
       );
-      console.log("no error all good");
       post = new Post({
         user: user._id,
         title,
@@ -66,7 +62,6 @@ export const addPost = async (req, res) => {
       post,
     });
   } catch (err) {
-    // console.log(err);
     res.status(500).json({ message: "Error adding post", err });
   }
 };
@@ -159,7 +154,6 @@ export const editPost = async (req, res) => {
       updatedPost: result,
     });
   } catch (err) {
-    // console.log(err);
     res.status(500).json({ message: "Error updating post", err });
   }
 };
@@ -167,7 +161,6 @@ export const likePost = async (req, res) => {
   try {
     const user = req.user;
     const { postid } = req.body;
-    // console.log("postid::",postid)
     const userId = user?._id;
     const post = await Post.findById(postid);
     if (!post) {
@@ -271,7 +264,6 @@ export const allPosts = async (req, res) => {
       totalPosts,
     });
   } catch (error) {
-    console.error("Error fetching posts:", error);
     res.status(500).json({ message: "Error fetching posts", success: false });
   }
 };
@@ -298,7 +290,6 @@ export const addReplies = async (req, res) => {
       username: user?.fullName,
       content,
     });
-    // console.log("first");
     await newcomment.save();
     comment?.replies?.unshift(newcomment?._id);
     await comment.save();
